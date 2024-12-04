@@ -17,7 +17,7 @@ public class AccountService {
 
     //register new account
     public String register(Account newAccount){
-        if(newAccount.getUsername()!=null && newAccount.getPassword().length()>3) {
+        if(newAccount.getUsername()!=null && !newAccount.getUsername().isEmpty() && newAccount.getPassword().length()>3) {
             Account accountOptional = accountRepository.findAccountByUsername(newAccount.getUsername());
             if(accountOptional!=null) return "Duplicate";
             accountRepository.save(newAccount); return "Success";

@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.entity.Account;
-//import com.example.entity.Message;
+import com.example.entity.Message;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,24 +9,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-/**
- * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
- * found in readme.md as well as the test cases. You be required to use the @GET/POST/PUT/DELETE/etc Mapping annotations
- * where applicable as well as the @ResponseBody and @PathVariable annotations. You should
- * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
- */
 @RestController
 public class SocialMediaController {
 
     private AccountService accountService;
-    //private MessageService messageService;
+    private MessageService messageService;
 
     @Autowired
-    public SocialMediaController(AccountService accountService/* , MessageService messageService*/){
+    public SocialMediaController(AccountService accountService, MessageService messageService){
         this.accountService = accountService;
-        //this.messageService = messageService;
+        this.messageService = messageService;
     }
 
     //account
@@ -53,10 +49,54 @@ public class SocialMediaController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(logged);
         }
-        else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(null);
-        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(null);
     }
 
+    //message
+    @PostMapping("/messages")
+    public ResponseEntity<Message> newMessage(@RequestBody Message message){
+        Message newmessage = messageService.createMessage(message);
+        if(newmessage!=null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(newmessage);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(null);
+    }
+    @GetMapping("/messages")
+    public ResponseEntity<List<Message>> getMessages(){
+        List<Message> messages = messageService.getMessages();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(messages);
+    }
+    @GetMapping("/messages/{messageId}")
+    public ResponseEntity<Message> getMessageById(@PathVariable Integer messageId){
+        Message message = messageService.getMessageById(messageId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(message);
+    }
+    @DeleteMapping("/messages/{messageId}")
+    public ResponseEntity<String> deleteMessageById(@PathVariable Integer messageId){
+        String row = messageService.deleteMessageById(messageId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(row);
+    }
+    @PatchMapping("/messages/{messageId}")
+    public ResponseEntity<String> updateMessageById(@PathVariable int messageId, @RequestBody Map<String, Object> messageText){
+        String newMessage = (String) messageText.get("messageText");
+        String row = messageService.updateMessageById(messageId, newMessage);
+        if(row!=null){
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(row);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(null);
+    }
+    @GetMapping("/accounts/{accountId}/messages")
+    public ResponseEntity<List<Message>> getMessageByAccount(@PathVariable Integer accountId){
+        List<Message> message = messageService.getMessageByAccount(accountId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(message);
+    }
 }
